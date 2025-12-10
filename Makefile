@@ -5,7 +5,7 @@ BINARY_NAME=monify
 VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT?=$(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_DATE?=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-LDFLAGS=-ldflags "-w -s -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(BUILD_DATE)"
+LDFLAGS=-ldflags "-w -s -X main.commit=$(COMMIT) -X main.date=$(BUILD_DATE)"
 
 # Directories
 BUILD_DIR=build
