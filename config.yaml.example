@@ -1,0 +1,76 @@
+# Monify Agent Configuration
+# This is an example configuration file. Copy to /etc/monify/config.yaml and customize.
+
+# Server configuration
+server:
+  # Monify API endpoint
+  url: "https://api.monify.cloud/v1/agent/metrics"
+  
+  # Authentication token (set via TOKEN_DEVICE env var in /etc/monify/.env)
+  token: ""
+  
+  # Request timeout
+  timeout: 10s
+  
+  # TLS settings
+  tls:
+    enabled: true
+    insecure_skip_verify: false
+
+# Agent identification
+agent:
+  # Agent version (set automatically)
+  version: "1.0.0"
+
+# Metric collection settings
+collection:
+  # How often to collect and send metrics
+  # Can be updated remotely by server via update_config command
+  # Examples: "30s", "1m", "5m"
+  interval: 30s
+
+# Control which metrics to collect
+metrics:
+  # CPU usage and load averages
+  cpu: true
+  
+  # Memory and swap usage
+  memory: true
+  
+  # Disk usage and I/O statistics
+  disk: true
+  
+  # Network interface statistics
+  network: true
+  
+  # System information (OS, uptime, processes)
+  system: true
+
+# Port scanner configuration
+port_scanner:
+  # Enable port scanning capability
+  enabled: true
+  
+  # Timeout for each port probe
+  timeout: 5s
+  
+  # Maximum concurrent workers for scanning
+  max_workers: 100
+
+# Logging configuration
+logging:
+  # Log level: debug, info, warn, error
+  level: "info"
+  
+  # Log format: text, json
+  format: "text"
+  
+  # Log file path (empty for stdout/journald)
+  file: ""
+
+# Environment variable overrides (recommended method):
+# Create /etc/monify/.env with:
+# - TOKEN_DEVICE: Authentication token (required)
+# - MONIFY_SERVER_URL: Server URL (optional)
+# - MONIFY_LOG_LEVEL: Log level (optional)
+# - MONIFY_COLLECTION_INTERVAL: Collection interval (optional)
