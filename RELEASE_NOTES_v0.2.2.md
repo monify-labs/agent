@@ -1,4 +1,4 @@
-# Release Notes - Monify Agent v0.2.1
+# Release Notes - Monify Agent v0.2.2
 
 **Release Date:** December 11, 2025  
 **Type:** Patch Release
@@ -7,7 +7,7 @@
 
 ## 🎯 Overview
 
-Version 0.2.1 is a patch release that addresses critical accuracy issues in hardware metric collection. It ensures that CPU core/thread counts are reported correctly across different architectures and that irrelevant disk partitions (with 0 size) are excluded from monitoring.
+Version 0.2.2 is a patch release that addresses critical accuracy issues in hardware metric collection. It ensures that CPU core/thread counts are reported correctly across different architectures and that irrelevant disk partitions (with 0 size) are excluded from monitoring.
 
 ---
 
