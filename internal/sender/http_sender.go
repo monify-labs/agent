@@ -77,6 +77,7 @@ func (h *HTTPSender) Send(ctx context.Context, payload *models.MetricPayload) (*
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Content-Encoding", "gzip")
 	req.Header.Set("User-Agent", fmt.Sprintf("monify/%s", h.config.Agent.Version))
+	req.Header.Set("X-Agent-Version", h.config.Agent.Version)
 
 	// Set authentication if API key is configured
 	if h.config.Server.Token != "" {

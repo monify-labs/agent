@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/monify-labs/agent/internal/agent"
 	"github.com/monify-labs/agent/pkg/config"
@@ -92,7 +94,38 @@ Documentation:
 }
 
 func handleStatus() {
-	// Load config
+	// 1. Try to read status file first
+	statusFile := "/var/log/monify/status.json"
+	var agentStatus struct {
+		Hostname       string    `json:"hostname"`
+		Version        string    `json:"version"`
+		Uptime         uint64    `json:"uptime"`
+		LastCollection time.Time `json:"last_collection"`
+		LastSend       time.Time `json:"last_send"`
+		MetricsCount   uint64    `json:"metrics_count"`
+		ErrorCount     uint64    `json:"error_count"`
+		Status         string    `json:"status"`
+	}
+
+	statusBytes, err := os.ReadFile(statusFile)
+	isRunning := err == nil
+	
+	if isRunning {
+		// Parse status file
+		// Need simple JSON parsing without external deps if possible, but we have encoding/json
+		// We'll define a local struct or map
+		if err := json.Unmarshal(statusBytes, &agentStatus); err != nil {
+			isRunning = false // Corrupt file
+		} else {
+			// Check if file is stale (older than 2 minutes)
+			info, _ := os.Stat(statusFile)
+			if time.Since(info.ModTime()) > 2*time.Minute {
+				agentStatus.Status = "stale (not running?)"
+			}
+		}
+	}
+
+	// 2. Load config for static backup
 	cfg, err := config.LoadConfig(defaultConfigPath)
 	if err != nil {
 		fmt.Printf("Error loading config: %v\n", err)
@@ -101,13 +134,32 @@ func handleStatus() {
 
 	// Check if authenticated
 	authenticated := cfg.Server.Token != ""
-
+    
+    // Clear screen or just header
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	fmt.Println("  Monify Agent Status")
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	fmt.Println()
-	fmt.Printf("Version:        %s\n", version)
+
+    if isRunning && agentStatus.Hostname != "" {
+        fmt.Printf("Status:         %s\n", agentStatus.Status)
+        fmt.Printf("Version:        %s\n", agentStatus.Version)
+        fmt.Printf("Hostname:       %s\n", agentStatus.Hostname)
+        fmt.Printf("Uptime:         %ds\n", agentStatus.Uptime)
+        fmt.Println()
+        fmt.Printf("Last Collection: %s\n", agentStatus.LastCollection.Format(time.RFC3339))
+        fmt.Printf("Last Send:       %s\n", agentStatus.LastSend.Format(time.RFC3339))
+        fmt.Printf("Metrics Sent:    %d\n", agentStatus.MetricsCount)
+        fmt.Printf("Errors:          %d\n", agentStatus.ErrorCount)
+    } else {
+        fmt.Printf("Status:         STOPPED (or no status file at %s)\n", statusFile)
+        fmt.Printf("Version:        %s\n", version)
+        fmt.Printf("Hostname:       %s\n", "unknown")
+    }
+
+	fmt.Println()
 	fmt.Printf("Config:         %s\n", defaultConfigPath)
+	fmt.Printf("Server URL:     %s\n", cfg.Server.URL)
 	fmt.Printf("Authenticated:  %v\n", authenticated)
 
 	if authenticated {
@@ -118,19 +170,6 @@ func handleStatus() {
 		}
 		fmt.Printf("Token:          %s\n", token)
 	}
-
-	hostname, _ := os.Hostname()
-	if hostname == "" {
-		hostname = "unknown"
-	}
-	fmt.Printf("Hostname:       %s\n", hostname)
-	fmt.Printf("Server URL:     %s\n", cfg.Server.URL)
-	fmt.Printf("Interval:       %s\n", cfg.Collection.Interval)
-	fmt.Println()
-
-	// Check if service is running
-	fmt.Println("Service Status:")
-	fmt.Println("  Run: systemctl status monify")
 	fmt.Println()
 
 	if !authenticated {

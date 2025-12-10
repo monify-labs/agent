@@ -129,6 +129,9 @@ func (a *Agent) Start(ctx context.Context) error {
 	// Collect immediately on start
 	a.collectAndSend(ctx)
 
+	// Start status writer
+	go a.startStatusWriter(ctx)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -300,6 +303,9 @@ func (a *Agent) collectAndSend(ctx context.Context) {
 		a.logger.Info("Static info sent to server (will not be sent again)")
 	}
 	a.mu.Unlock()
+
+	// Update status file
+	go a.writeStatusFile()
 
 	a.logger.Debug("Metrics sent successfully")
 
