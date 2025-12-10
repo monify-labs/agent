@@ -70,8 +70,8 @@ web/
 # Agent specific
 /var/log/monify/
 /var/run/monify.lock
-agent
-monify
+/agent
+/monify
 monify-*
 config/
 logs/

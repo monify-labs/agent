@@ -66,14 +66,14 @@ func (s *SystemCollector) CollectStatic(ctx context.Context) (*models.StaticMetr
 	cpuInfo, err := cpu.InfoWithContext(ctx)
 	if err == nil && len(cpuInfo) > 0 {
 		static.CPUModel = cpuInfo[0].ModelName
-		static.CPUCores = int(cpuInfo[0].Cores)
+	}
 
-		// Count total threads
-		totalThreads := 0
-		for _, info := range cpuInfo {
-			totalThreads += int(info.Cores)
-		}
-		static.CPUThreads = totalThreads
+	// Get CPU stats (counts)
+	if cores, err := cpu.CountsWithContext(ctx, false); err == nil {
+		static.CPUCores = cores
+	}
+	if threads, err := cpu.CountsWithContext(ctx, true); err == nil {
+		static.CPUThreads = threads
 	}
 
 	// Get total memory
@@ -184,14 +184,14 @@ func (s *SystemCollector) Collect(ctx context.Context) (interface{}, error) {
 	cpuInfo, err := cpu.InfoWithContext(ctx)
 	if err == nil && len(cpuInfo) > 0 {
 		metrics.CPUModel = cpuInfo[0].ModelName
-		metrics.CPUCores = int(cpuInfo[0].Cores)
+	}
 
-		// Count total threads
-		totalThreads := 0
-		for _, info := range cpuInfo {
-			totalThreads += int(info.Cores)
-		}
-		metrics.CPUThreads = totalThreads
+	// Get CPU stats (counts)
+	if cores, err := cpu.CountsWithContext(ctx, false); err == nil {
+		metrics.CPUCores = cores
+	}
+	if threads, err := cpu.CountsWithContext(ctx, true); err == nil {
+		metrics.CPUThreads = threads
 	}
 
 	// Get total memory

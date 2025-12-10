@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-12-11
+
+### Fixed
+- Corrected CPU core and thread counting logic for accurate hardware reporting on all architectures
+- Filtered out disk partitions with 0 total size (e.g., pseudo-filesystems, empty mounts) to prevent noise in metrics
+
 ## [0.2.0] - 2025-12-11
 
 ### Added

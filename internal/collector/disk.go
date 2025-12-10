@@ -41,6 +41,11 @@ func (d *DiskCollector) Collect(ctx context.Context) (interface{}, error) {
 			continue
 		}
 
+		// Skip partitions with 0 total size (pseudo-filesystems, etc.)
+		if usage.Total == 0 {
+			continue
+		}
+
 		metric := models.DiskMetrics{
 			Device:      partition.Device,
 			MountPoint:  partition.Mountpoint,
