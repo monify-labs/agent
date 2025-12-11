@@ -20,7 +20,7 @@ server:
 # Agent identification
 agent:
   # Agent version (set automatically)
-  version: "1.0.0"
+  version: "0.2.3"
 
 # Metric collection settings
 collection:

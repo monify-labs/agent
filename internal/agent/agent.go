@@ -328,6 +328,13 @@ func (a *Agent) Stop() error {
 	close(a.stopChan)
 	a.running = false
 
+	// Stop all collectors
+	for _, col := range a.collectors {
+		if err := col.Stop(); err != nil {
+			a.logger.WithError(err).WithField("collector", col.Name()).Error("Failed to stop collector")
+		}
+	}
+
 	// Close sender
 	if err := a.sender.Close(); err != nil {
 		a.logger.WithError(err).Error("Failed to close sender")

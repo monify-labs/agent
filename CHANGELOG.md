@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2025-12-11
+
+### Fixed
+- Fixed metric accuracy for CPU and Memory by implementing continuous sampling (1s interval) with averaging. This aligns agent metrics with cloud provider dashboards (like DigitalOcean) by capturing spikes and fluctuating loads that were previously missed by snapshot-based collection.
+- Refactored `Collector` interface to support graceful shutdown of background sampling goroutines.
+
+
 ## [0.2.2] - 2025-12-11
 
 ### Fixed

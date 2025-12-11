@@ -14,6 +14,9 @@ type Collector interface {
 
 	// Enabled returns whether this collector is enabled
 	Enabled() bool
+
+	// Stop stops any background processes used by the collector
+	Stop() error
 }
 
 // BaseCollector provides common functionality for all collectors
@@ -38,4 +41,10 @@ func (b *BaseCollector) Name() string {
 // Enabled returns whether the collector is enabled
 func (b *BaseCollector) Enabled() bool {
 	return b.enabled
+}
+
+// Stop stops the collector and cleans up resources
+func (b *BaseCollector) Stop() error {
+	// Default implementation does nothing
+	return nil
 }
