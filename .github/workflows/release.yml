@@ -48,7 +48,7 @@ jobs:
           BINARY_NAME=monify-linux-${GOARCH}
           
           go build \
-            -ldflags="-w -s -X main.commit=${GITHUB_SHA::7} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -ldflags="-w -s -X main.version=${VERSION} -X main.commit=${GITHUB_SHA::7} -X main.date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -o build/${BINARY_NAME} \
             ./cmd/agent
       
