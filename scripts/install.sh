@@ -9,6 +9,7 @@ INSTALL_DIR="/usr/local/bin"
 CONFIG_DIR="/etc/monify"
 SYSTEMD_DIR="/etc/systemd/system"
 LOCK_DIR="/var/run"
+LOG_DIR="/var/log/monify"
 
 BINARY_NAME="monify"
 SERVICE_NAME="monify"
@@ -131,6 +132,7 @@ create_directories() {
     log_info "Creating directories..."
     mkdir -p "$CONFIG_DIR"
     mkdir -p "$LOCK_DIR"
+    mkdir -p "$LOG_DIR"
     log_success "Directories created"
 }
 
@@ -212,6 +214,12 @@ Type=simple
 User=root
 Group=root
 EnvironmentFile=-${CONFIG_DIR}/.env
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=${CONFIG_DIR} ${LOCK_DIR} ${LOG_DIR}
 ExecStart=${INSTALL_DIR}/${BINARY_NAME} start
 ExecReload=/bin/kill -HUP \$MAINPID
 Restart=always
@@ -221,13 +229,6 @@ StartLimitBurst=5
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=${SERVICE_NAME}
-
-# Security settings
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=${CONFIG_DIR} ${LOCK_DIR}
 
 # Resource limits
 LimitNOFILE=65536
