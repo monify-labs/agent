@@ -314,6 +314,25 @@ main() {
     check_root "$@"
     detect_platform
     check_dependencies
+    
+    # Check if agent is already running
+    if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${YELLOW}  ⚠️  Monify Agent is already running!${NC}"
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        log_warn "An active instance of Monify Agent was detected."
+        echo ""
+        echo "To reinstall, you must first uninstall the existing agent."
+        echo "Run the following command to uninstall:"
+        echo ""
+        echo -e "  ${GREEN}curl -fsSL https://monify.cloud/uninstall.sh | sudo bash${NC}"
+        echo ""
+        echo "After uninstalling, you can run the install command again."
+        echo ""
+        exit 1
+    fi
+
     download_binary "$version"
     stop_service
     install_binary

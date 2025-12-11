@@ -19,6 +19,12 @@ Version 0.2.2 is a patch release that addresses critical accuracy issues in hard
 ### ✅ Cleaner Disk Metrics
 - Implemented filtering to exclude disk partitions with 0 total size (e.g., pseudo-filesystems like `/proc`, `/sys` mounts or unmounted volumes) from the metrics payload. This reduces noise and ensures only relevant storage devices are monitored.
 
+### ✅ Improved Status Authentication
+- Fixed an issue where `monify status` would incorrectly report "Not authenticated" even when a valid token was configured in the environment file. The status command now correctly loads the environment configuration.
+
+### ✅ Safer Installation Script
+- The installation script now checks for existing running instances of the agent before proceeding. If an active instance is detecting, it will abort the installation and guide the user to uninstall first, preventing conflicts.
+
 ---
 
 ## 📦 Upgrade Instructions

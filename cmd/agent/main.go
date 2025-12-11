@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/monify-labs/agent/internal/agent"
@@ -26,6 +27,9 @@ const (
 )
 
 func main() {
+	// Load environment variables from .env file
+	loadEnv(defaultEnvPath)
+
 	// No arguments = show help
 	if len(os.Args) < 2 {
 		showHelp()
@@ -238,5 +242,40 @@ func runDaemon() {
 	if err := ag.Start(ctx); err != nil {
 		fmt.Fprintf(os.Stderr, "Agent error: %v\n", err)
 		os.Exit(1)
+	}
+}
+
+// loadEnv loads environment variables from a file (simple key=value format)
+// It does NOT overwrite existing environment variables.
+func loadEnv(path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return // File might not exist, which is fine
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+
+		// Remove quotes if present
+		if len(value) >= 2 && ((value[0] == '"' && value[len(value)-1] == '"') || (value[0] == '\'' && value[len(value)-1] == '\'')) {
+			value = value[1 : len(value)-1]
+		}
+
+		// Only set if not already set
+		if os.Getenv(key) == "" {
+			os.Setenv(key, value)
+		}
 	}
 }
