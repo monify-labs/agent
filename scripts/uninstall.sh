@@ -7,6 +7,7 @@ INSTALL_DIR="/usr/local/bin"
 CONFIG_DIR="/etc/monify"
 SYSTEMD_DIR="/etc/systemd/system"
 LOG_DIR="/var/log/monify"
+STATE_DIR="/var/lib/monify"
 
 BINARY_NAME="monify"
 SERVICE_NAME="monify"
@@ -61,28 +62,34 @@ remove_service() {
     fi
 }
 
-# Remove config and logs
+# Remove config, logs, and state
 remove_data() {
     echo ""
-    echo -e "${YELLOW}Do you want to remove configuration and logs?${NC}"
+    echo -e "${YELLOW}Do you want to remove configuration, logs, and state files?${NC}"
     echo -e "  Config: ${CONFIG_DIR}"
     echo -e "  Logs:   ${LOG_DIR}"
+    echo -e "  State:  ${STATE_DIR}"
     echo ""
     read -p "Remove data? [y/N]: " -n 1 -r
     echo
-    
+
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         if [ -d "$CONFIG_DIR" ]; then
             rm -rf "$CONFIG_DIR"
             echo -e "${GREEN}✓ Removed config directory${NC}"
         fi
-        
+
         if [ -d "$LOG_DIR" ]; then
             rm -rf "$LOG_DIR"
             echo -e "${GREEN}✓ Removed log directory${NC}"
         fi
+
+        if [ -d "$STATE_DIR" ]; then
+            rm -rf "$STATE_DIR"
+            echo -e "${GREEN}✓ Removed state directory${NC}"
+        fi
     else
-        echo -e "${BLUE}ℹ Kept configuration and logs${NC}"
+        echo -e "${BLUE}ℹ Kept configuration, logs, and state${NC}"
     fi
 }
 
