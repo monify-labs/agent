@@ -124,7 +124,6 @@ func (c *CPUCollector) Collect(ctx context.Context) (interface{}, error) {
 			totalSum += avgPerCore[i]
 		}
 
-		metrics.PerCore = avgPerCore
 		if numCores > 0 {
 			metrics.UsagePercent = totalSum / float64(numCores)
 		}
@@ -135,7 +134,6 @@ func (c *CPUCollector) Collect(ctx context.Context) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		metrics.PerCore = perCore
 		
 		var total float64
 		for _, p := range perCore {
@@ -152,9 +150,6 @@ func (c *CPUCollector) Collect(ctx context.Context) (interface{}, error) {
 		metrics.LoadAvg1m = loadAvg.Load1
 		metrics.LoadAvg5m = loadAvg.Load5
 		metrics.LoadAvg15m = loadAvg.Load15
-
-		// Deprecated - kept for backward compatibility
-		metrics.LoadAvg = []float64{loadAvg.Load1, loadAvg.Load5, loadAvg.Load15}
 	}
 
 	return metrics, nil

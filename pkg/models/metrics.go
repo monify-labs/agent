@@ -53,10 +53,6 @@ type DynamicMetrics struct {
 	NetworkPrivate *NetworkAggregateMetrics `json:"network_private,omitempty"`
 	NetworkHealth  *NetworkHealthMetrics    `json:"network_health,omitempty"`
 	System         *SystemDynamic           `json:"system,omitempty"` // Dynamic system metrics only
-
-	// Deprecated - kept for backward compatibility
-	Disk    []DiskMetrics    `json:"disk,omitempty"`
-	Network []NetworkMetrics `json:"network,omitempty"`
 }
 
 // SystemDynamic contains frequently-changing system metrics
@@ -77,14 +73,10 @@ type MetricsData struct {
 
 // CPUMetrics contains CPU usage information
 type CPUMetrics struct {
-	UsagePercent float64   `json:"usage_percent"`
-	LoadAvg1m    float64   `json:"load_avg_1m"`
-	LoadAvg5m    float64   `json:"load_avg_5m"`
-	LoadAvg15m   float64   `json:"load_avg_15m"`
-
-	// Deprecated - kept for backward compatibility
-	PerCore []float64 `json:"per_core,omitempty"`
-	LoadAvg []float64 `json:"load_avg,omitempty"` // 1, 5, 15 minute averages
+	UsagePercent float64 `json:"usage_percent"`
+	LoadAvg1m    float64 `json:"load_avg_1m"`
+	LoadAvg5m    float64 `json:"load_avg_5m"`
+	LoadAvg15m   float64 `json:"load_avg_15m"`
 }
 
 // MemoryMetrics contains memory usage information
@@ -96,11 +88,6 @@ type MemoryMetrics struct {
 	UsedPercent float64 `json:"used_percent"`
 	Cached      uint64  `json:"cached"`
 	Buffers     uint64  `json:"buffers"`
-
-	// Deprecated - kept for backward compatibility
-	SwapTotal uint64 `json:"swap_total,omitempty"`
-	SwapUsed  uint64 `json:"swap_used,omitempty"`
-	SwapFree  uint64 `json:"swap_free,omitempty"`
 }
 
 // SwapMetrics contains swap memory usage information

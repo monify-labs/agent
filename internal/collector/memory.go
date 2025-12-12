@@ -76,14 +76,6 @@ func (c *MemoryCollector) collectSample(ctx context.Context) {
 		metrics.Buffers = vmStat.Buffers
 	}
 
-	// Get swap memory stats
-	swapStat, err := mem.SwapMemoryWithContext(ctx)
-	if err == nil {
-		metrics.SwapTotal = swapStat.Total
-		metrics.SwapUsed = swapStat.Used
-		metrics.SwapFree = swapStat.Free
-	}
-
 	c.mu.Lock()
 	if len(c.samples) > 600 {
 		// Drop oldest samples
@@ -146,10 +138,6 @@ func (c *MemoryCollector) Collect(ctx context.Context) (interface{}, error) {
 		
 		avg.Cached += s.Cached
 		avg.Buffers += s.Buffers
-		
-		avg.SwapTotal = s.SwapTotal
-		avg.SwapUsed += s.SwapUsed
-		avg.SwapFree += s.SwapFree
 	}
 
 	avg.Used = avg.Used / count
@@ -158,16 +146,19 @@ func (c *MemoryCollector) Collect(ctx context.Context) (interface{}, error) {
 	avg.UsedPercent = usedPercentSum / countF
 	avg.Cached = avg.Cached / count
 	avg.Buffers = avg.Buffers / count
-	avg.SwapUsed = avg.SwapUsed / count
-	avg.SwapFree = avg.SwapFree / count
 
-	// Create separate swap metrics
-	swap := &models.SwapMetrics{
-		Total: avg.SwapTotal,
-		Used:  avg.SwapUsed,
+	// Get current swap metrics (not averaged, just current snapshot)
+	swapStat, err := mem.SwapMemoryWithContext(context.Background())
+	if err != nil {
+		return nil, err
 	}
-	if avg.SwapTotal > 0 {
-		swap.UsedPercent = (float64(avg.SwapUsed) / float64(avg.SwapTotal)) * 100
+
+	swap := &models.SwapMetrics{
+		Total: swapStat.Total,
+		Used:  swapStat.Used,
+	}
+	if swapStat.Total > 0 {
+		swap.UsedPercent = (float64(swapStat.Used) / float64(swapStat.Total)) * 100
 	}
 
 	// Return both memory and swap as a map

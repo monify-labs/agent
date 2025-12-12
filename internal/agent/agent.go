@@ -276,10 +276,7 @@ func (a *Agent) collectAndSend(ctx context.Context) {
 			if diskIO, ok := m["disk_io"].(*models.DiskIOMetrics); ok {
 				dynamicMetrics.DiskIO = diskIO
 			}
-			if disk, ok := m["disk"].([]models.DiskMetrics); ok {
-				dynamicMetrics.Disk = disk
-			}
-			// New network collector returns map with "network_public", "network_private", "network_health", and "network"
+			// Network aggregated metrics
 			if netPub, ok := m["network_public"].(*models.NetworkAggregateMetrics); ok {
 				dynamicMetrics.NetworkPublic = netPub
 			}
@@ -289,15 +286,6 @@ func (a *Agent) collectAndSend(ctx context.Context) {
 			if netHealth, ok := m["network_health"].(*models.NetworkHealthMetrics); ok {
 				dynamicMetrics.NetworkHealth = netHealth
 			}
-			if network, ok := m["network"].([]models.NetworkMetrics); ok {
-				dynamicMetrics.Network = network
-			}
-		case []models.DiskMetrics:
-			// Legacy path - keep for backward compatibility
-			dynamicMetrics.Disk = m
-		case []models.NetworkMetrics:
-			// Legacy path - keep for backward compatibility
-			dynamicMetrics.Network = m
 		case *models.SystemDynamic:
 			dynamicMetrics.System = m
 		}
