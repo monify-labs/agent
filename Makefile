@@ -76,6 +76,12 @@ dev:
 	@echo "Running in development mode..."
 	MONIFY_DEBUG=true go run ./$(CMD_DIR) run
 
+# Run locally with local backend (for development)
+dev-local:
+	@echo "Running in development mode with local backend..."
+	@echo "Sending metrics to http://localhost:3000/v1/agent/metrics"
+	MONIFY_DEBUG=true MONIFY_SERVER_URL=http://localhost:3000/v1/agent/metrics go run ./$(CMD_DIR) run
+
 # Install locally (requires root)
 install: build-amd64
 	@echo "Installing $(BINARY_NAME)..."
