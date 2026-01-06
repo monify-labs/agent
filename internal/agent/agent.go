@@ -290,35 +290,9 @@ func (a *Agent) GetStatus() *models.AgentStatus {
 
 // processServerCommands processes commands received from server
 func (a *Agent) processServerCommands(ctx context.Context, commands []models.ServerCommand) {
-	for _, cmd := range commands {
-		if a.debug {
-			log.Printf("INFO: Processing server command [command=%s]", cmd.Command)
-		}
-
-		switch cmd.Command {
-		case "uninstall":
-			reason := "Server deleted"
-			if r, ok := cmd.Params["reason"].(string); ok {
-				reason = r
-			}
-			log.Printf("WARN: Received uninstall command [reason=%s]", reason)
-			go func() {
-				time.Sleep(2 * time.Second)
-				a.runUninstallScript()
-			}()
-
-		default:
-			if a.debug {
-				log.Printf("DEBUG: Ignoring unsupported command [command=%s]", cmd.Command)
-			}
-		}
-	}
-}
-
-// runUninstallScript executes the uninstall script to remove the agent
-func (a *Agent) runUninstallScript() {
-	log.Printf("INFO: Executing uninstall script")
-	exec.Command("bash", "-c", "curl -sSL https://monify.cloud/uninstall.sh | sudo bash").Start()
+	// Currently no supported remote commands from server
+	// Agent will stop automatically if it receives 401/403 (Unauthorized/Forbidden)
+	// which happens when a server is deleted in the backend.
 }
 
 // incrementErrorCount increments the error counter
