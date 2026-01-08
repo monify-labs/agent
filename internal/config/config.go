@@ -17,7 +17,7 @@ const (
 	StaticRefreshInterval = 1 * time.Hour
 
 	// Agent info (injected at build time via ldflags)
-	Version   = "1.1.1"
+	Version   = "1.2.0"
 	Commit    = "unknown"
 	BuildDate = "unknown"
 

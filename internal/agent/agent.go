@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -76,12 +75,9 @@ func (a *Agent) Start(ctx context.Context) error {
 	a.dynamicCollector.Start()
 	defer a.dynamicCollector.Stop()
 
-	// Initial static collection to get hostname
-	staticMetrics, err := a.staticCollector.Collect(ctx)
-	if err != nil {
-		log.Printf("WARN: %v - %s", err, "Failed to collect initial static metrics")
-	} else {
-		a.hostname = staticMetrics.Hostname
+	// Initial hostname for logging
+	if h, err := os.Hostname(); err == nil {
+		a.hostname = h
 	}
 
 	log.Printf("INFO: %s [%s=%v]", "Agent starting", "hostname", a.hostname)
