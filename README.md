@@ -31,38 +31,50 @@ That's it! The agent will be installed, configured, and started automatically.
 - **Architecture**: amd64 (x86_64) or arm64 (aarch64)
 - **Init System**: systemd
 
-## Commands
+## Usage
 
-| Command | Sudo? | Description |
-|---------|-------|-------------|
-| `monify status` | ❌ | Show agent status and troubleshooting hints |
-| `monify login [TOKEN]` | ✅ | Save authentication token (interactive or argument) |
-| `monify logout` | ✅ | Remove token and stop agent |
-| `monify update` | ✅ | Update agent to latest version |
-| `monify version` | ❌ | Show version information |
-| `monify help` | ❌ | Show help |
-| `monify run` | ✅ | Start agent in foreground (used by systemd) |
+```bash
+monify [options]
+```
+
+### Options
+
+| Option      | Description                                     |
+| ----------- | ----------------------------------------------- |
+| `--token`   | Authentication token (or set MONIFY_TOKEN)      |
+| `--url`     | Server URL (or set MONIFY_SERVER_URL)           |
+| `--debug`   | Enable debug logging (or set MONIFY_DEBUG=true) |
+| `--version` | Show version information                        |
+| `--help`    | Show help message                               |
 
 ### Examples
 
 ```bash
-# Check status (shows troubleshooting if stopped)
-monify status
+# Run with token from command line
+monify --token=YOUR_TOKEN
 
-# Login with token (two ways)
-sudo monify login                    # Interactive prompt
-sudo monify login YOUR_TOKEN         # Direct argument
+# Run with debug mode
+monify --token=YOUR_TOKEN --debug
 
-# Update to latest version (keeps existing token)
-sudo monify update
+# Run with custom server URL
+monify --token=YOUR_TOKEN --url=https://custom-api.example.com
 
-# Logout and stop agent
-sudo monify logout
+# Show version
+monify --version
+
+# Show help
+monify --help
 ```
 
 ## Configuration
 
-Configuration is stored in `/etc/monify/env`:
+The agent reads configuration in this order (later overrides earlier):
+
+1. **Config file**: `/etc/monify/env`
+2. **Environment variables**
+3. **Command line flags**
+
+### Config file example (`/etc/monify/env`)
 
 ```bash
 # Required: Your server token from https://dash.monify.cloud
@@ -73,6 +85,14 @@ MONIFY_SERVER_URL=https://api.monify.cloud/v1/agent/metrics
 
 # Optional: Enable debug logging
 MONIFY_DEBUG=false
+```
+
+### Environment variables
+
+```bash
+# Run with environment variables
+MONIFY_TOKEN=xxx monify
+MONIFY_TOKEN=xxx MONIFY_DEBUG=true monify
 ```
 
 ## Systemd Service
@@ -119,7 +139,7 @@ make build GOARCH=arm64
 make dev
 
 # Or manually
-MONIFY_TOKEN=your_token MONIFY_DEBUG=true go run ./cmd/monify run
+MONIFY_TOKEN=your_token MONIFY_DEBUG=true go run ./cmd/monify
 ```
 
 ### Project Structure
@@ -147,33 +167,32 @@ MONIFY_TOKEN=your_token MONIFY_DEBUG=true go run ./cmd/monify run
 
 ## Update
 
-### Method 1: Using monify command (recommended)
-```bash
-sudo monify update
-```
-This will download the latest version and restart the agent, keeping your existing token.
+### Re-run install script
 
-### Method 2: Re-run install script
 ```bash
 curl -sSL https://monify.cloud/install.sh | sudo bash
 ```
+
 If already installed, the script will automatically use your existing token.
 
-### Method 3: Install with new token
+### Install with new token
+
 ```bash
 curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force
 ```
+
 Use `--force` when replacing an existing token to avoid accidental overwrites.
 
 ## Troubleshooting
 
-### Check agent status
+### Check service status
+
 ```bash
-monify status
+sudo systemctl status monify
 ```
-This shows the service status and provides hints if something is wrong.
 
 ### View logs
+
 ```bash
 # Last 50 lines
 journalctl -u monify --no-pager -n 50
@@ -184,12 +203,12 @@ journalctl -u monify -f
 
 ### Common issues
 
-| Issue | Solution |
-|-------|----------|
-| Service stopped (auth failed) | Token invalid. Run: `sudo monify login NEW_TOKEN` → `sudo systemctl start monify` |
-| Token not configured | Run: `sudo monify login YOUR_TOKEN` |
-| Service won't start | Check logs: `journalctl -u monify --no-pager -n 20` |
-| Agent using too much CPU | Restart: `sudo systemctl restart monify` |
+| Issue                         | Solution                                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------------------------- |
+| Service stopped (auth failed) | Token invalid. Re-install with new token using `--force`                                      |
+| Token not configured          | Install with token: `curl -sSL https://monify.cloud/install.sh \| sudo bash -s -- YOUR_TOKEN` |
+| Service won't start           | Check logs: `journalctl -u monify --no-pager -n 20`                                           |
+| Agent using too much CPU      | Restart: `sudo systemctl restart monify`                                                      |
 
 ## Uninstall
 
@@ -213,36 +232,36 @@ sudo systemctl daemon-reload
 
 ### Static Metrics (sent on startup, then hourly)
 
-| Metric | Description |
-|--------|-------------|
-| Platform | OS distribution (ubuntu, centos, etc.) |
-| Platform Version | Distribution version |
-| Kernel Version | Linux kernel version |
-| Architecture | CPU architecture (amd64, arm64) |
-| Virtualization | Virtualization type (kvm, docker, etc.) |
-| CPU Model | CPU model name |
-| CPU Cores/Threads | Physical cores and logical processors |
-| Total Memory | Total RAM |
-| Internal IPs | Private IP addresses |
-| Public IP | Public-facing IP |
-| Cloud Region | AWS/GCP/Azure region (if applicable) |
-| Instance Type | Cloud instance type (if applicable) |
-| Disk Inventory | Mounted filesystems |
+| Metric            | Description                             |
+| ----------------- | --------------------------------------- |
+| Platform          | OS distribution (ubuntu, centos, etc.)  |
+| Platform Version  | Distribution version                    |
+| Kernel Version    | Linux kernel version                    |
+| Architecture      | CPU architecture (amd64, arm64)         |
+| Virtualization    | Virtualization type (kvm, docker, etc.) |
+| CPU Model         | CPU model name                          |
+| CPU Cores/Threads | Physical cores and logical processors   |
+| Total Memory      | Total RAM                               |
+| Internal IPs      | Private IP addresses                    |
+| Public IP         | Public-facing IP                        |
+| Cloud Region      | AWS/GCP/Azure region (if applicable)    |
+| Instance Type     | Cloud instance type (if applicable)     |
+| Disk Inventory    | Mounted filesystems                     |
 
 ### Dynamic Metrics (sent every 15s)
 
-| Metric | Description |
-|--------|-------------|
-| CPU Usage | Overall CPU usage percentage |
-| Load Average | 1m, 5m, 15m load averages |
-| Memory | Used, free, available, cached, buffers |
-| Swap | Swap usage |
-| Disk Space | Total, used, free across all partitions |
-| Disk I/O | Read/write MB/s and IOPS |
-| Network Public | Public interface bandwidth |
-| Network Private | Private interface bandwidth |
-| Network Health | Errors and drops |
-| System | Uptime, boot time, process count |
+| Metric          | Description                             |
+| --------------- | --------------------------------------- |
+| CPU Usage       | Overall CPU usage percentage            |
+| Load Average    | 1m, 5m, 15m load averages               |
+| Memory          | Used, free, available, cached, buffers  |
+| Swap            | Swap usage                              |
+| Disk Space      | Total, used, free across all partitions |
+| Disk I/O        | Read/write MB/s and IOPS                |
+| Network Public  | Public interface bandwidth              |
+| Network Private | Private interface bandwidth             |
+| Network Health  | Errors and drops                        |
+| System          | Uptime, boot time, process count        |
 
 ## Security
 
@@ -258,6 +277,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 
-- Documentation: https://docs.monify.cloud
 - Issues: https://github.com/monify-labs/agent/issues
 - Email: support@monify.cloud

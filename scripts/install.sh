@@ -169,13 +169,12 @@ create_service() {
     cat > "$SERVICE_FILE" << 'EOF'
 [Unit]
 Description=Monify Monitoring Agent
-Documentation=https://docs.monify.cloud
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/monify run
+ExecStart=/usr/local/bin/monify
 Restart=always
 RestartSec=5
 RestartPreventExitStatus=3
@@ -241,8 +240,8 @@ start_service() {
             echo ""
             echo "To fix:"
             echo "  1. Get a valid token from the dashboard"
-            echo "  2. Run: sudo monify login YOUR_NEW_TOKEN"
-            echo "  3. Run: sudo systemctl start monify"
+            echo "  2. Run install script again with new token:"
+            echo "     curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force"
             exit 1
         else
             print_error "Failed to start Monify Agent"
@@ -255,7 +254,7 @@ start_service() {
 # Print success message
 print_complete() {
     local version
-    version=$("${INSTALL_DIR}/${BINARY_NAME}" version 2>/dev/null | head -1 || echo "unknown")
+    version=$("${INSTALL_DIR}/${BINARY_NAME}" --version 2>/dev/null | head -1 || echo "unknown")
     
     echo ""
     echo "======================================"
@@ -353,5 +352,5 @@ main() {
     print_complete
 }
 
-# Run main with first argument as token
-main "$1"
+# Run main with arguments (token and optional --force)
+main "$1" "$2"

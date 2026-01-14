@@ -27,12 +27,20 @@ func CollectDiskInventory(ctx context.Context) ([]models.DiskInventoryMetrics, e
 			continue
 		}
 
+		// Calculate usage percentage
+		usedPercent := 0.0
+		if usage.Total > 0 {
+			usedPercent = float64(usage.Used) / float64(usage.Total) * 100
+		}
+
 		disks = append(disks, models.DiskInventoryMetrics{
 			Device:      partition.Device,
 			MountPoint:  partition.Mountpoint,
 			FSType:      partition.Fstype,
 			Total:       usage.Total,
-			InodesTotal: usage.InodesTotal,
+			Used:        usage.Used,
+			Free:        usage.Free,
+			UsedPercent: usedPercent,
 		})
 	}
 

@@ -148,7 +148,6 @@ print_complete() {
     echo "  - Service: ${SERVICE_FILE}"
     echo ""
     echo "Thank you for using Monify!"
-    echo "If you have any feedback, visit: https://monify.cloud/feedback"
     echo ""
 }
 

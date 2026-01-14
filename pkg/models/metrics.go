@@ -14,27 +14,27 @@ type MetricPayload struct {
 // StaticMetrics contains rarely-changing system information
 type StaticMetrics struct {
 	// System Info
-	Platform        string `json:"platform"`        // ubuntu, centos, etc.
-	PlatformFamily  string `json:"platform_family"` // debian, rhel, etc.
-	PlatformVersion string `json:"platform_version"`
-	OS              string `json:"os"`             // linux, darwin, windows
-	Arch            string `json:"arch"`           // amd64, arm64
-	KernelVersion   string `json:"kernel_version"` // 5.15.0-91-generic
-	KernelArch      string `json:"kernel_arch"`    // x86_64
-	Virtualization  string `json:"virtualization"` // kvm, docker, vmware, etc.
-	HostID          string `json:"host_id"`
+	Platform        string `json:"platform,omitempty"`        // ubuntu, centos, etc.
+	PlatformFamily  string `json:"platform_family,omitempty"` // debian, rhel, etc.
+	PlatformVersion string `json:"platform_version,omitempty"`
+	OS              string `json:"os,omitempty"`             // linux, darwin, windows
+	Arch            string `json:"arch,omitempty"`           // amd64, arm64
+	KernelVersion   string `json:"kernel_version,omitempty"` // 5.15.0-91-generic
+	KernelArch      string `json:"kernel_arch,omitempty"`    // x86_64
+	Virtualization  string `json:"virtualization,omitempty"` // kvm, docker, vmware, etc.
+	HostID          string `json:"host_id,omitempty"`
 
 	// Network Info
-	InternalIPs []string `json:"internal_ips"`        // All internal IPs
-	PublicIP    string   `json:"public_ip,omitempty"` // Public facing IP
-	Hostname    string   `json:"hostname"`            // Server hostname
-	FQDN        string   `json:"fqdn,omitempty"`      // Fully qualified domain name
+	InternalIPs []string `json:"internal_ips,omitempty"` // All internal IPs
+	PublicIP    string   `json:"public_ip,omitempty"`    // Public facing IP
+	Hostname    string   `json:"hostname,omitempty"`     // Server hostname
+	FQDN        string   `json:"fqdn,omitempty"`         // Fully qualified domain name
 
 	// Hardware Info
-	CPUModel    string `json:"cpu_model"`    // Intel(R) Xeon(R) CPU...
-	CPUCores    int    `json:"cpu_cores"`    // Physical cores
-	CPUThreads  int    `json:"cpu_threads"`  // Logical processors
-	TotalMemory uint64 `json:"total_memory"` // Total RAM in bytes
+	CPUModel    string `json:"cpu_model,omitempty"`    // Intel(R) Xeon(R) CPU...
+	CPUCores    int    `json:"cpu_cores,omitempty"`    // Physical cores
+	CPUThreads  int    `json:"cpu_threads,omitempty"`  // Logical processors
+	TotalMemory uint64 `json:"total_memory,omitempty"` // Total RAM in bytes
 
 	// Additional Info
 	Timezone     string `json:"timezone,omitempty"`      // Server timezone
@@ -93,11 +93,13 @@ type SwapMetrics struct {
 
 // DiskInventoryMetrics contains static disk/filesystem information
 type DiskInventoryMetrics struct {
-	Device      string `json:"device"`       // Device path (e.g., /dev/sda1)
-	MountPoint  string `json:"mount"`        // Mount point (e.g., /)
-	FSType      string `json:"fstype"`       // Filesystem type (e.g., ext4, xfs)
-	Total       uint64 `json:"total"`        // Total capacity in bytes
-	InodesTotal uint64 `json:"inodes_total"` // Total inodes
+	Device      string  `json:"device"`      // Device path (e.g., /dev/sda1)
+	MountPoint  string  `json:"mount"`       // Mount point (e.g., /)
+	FSType      string  `json:"fstype"`      // Filesystem type (e.g., ext4, xfs)
+	Total       uint64  `json:"total"`       // Total capacity in bytes
+	Used        uint64  `json:"used"`        // Used space in bytes
+	Free        uint64  `json:"free"`        // Free space in bytes
+	UsedPercent float64 `json:"usedPercent"` // Usage percentage
 }
 
 // DiskSpaceMetrics contains aggregated disk space usage across all partitions

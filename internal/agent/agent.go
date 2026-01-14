@@ -120,8 +120,8 @@ func (a *Agent) Start(ctx context.Context) error {
 
 			if isAuthFailed {
 				log.Printf("ERROR: %s", "Authentication failed - stopping agent")
-				log.Printf("ERROR: %s", "Agent stopped. Please login to restart:")
-				log.Printf("ERROR: %s", "  sudo monify login")
+				log.Printf("ERROR: %s", "Agent stopped. Please reinstall with a valid token:")
+				log.Printf("ERROR: %s", "  curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force")
 
 				if err := a.Stop(); err != nil {
 					log.Printf("ERROR: %v - %s", err, "Error during stop")
@@ -200,7 +200,7 @@ func (a *Agent) collectAndSend(ctx context.Context) {
 		// Check if this is an authentication error
 		if errors.Is(err, sender.ErrUnauthorized) {
 			log.Printf("ERROR: Authentication failed - token invalid/expired")
-			log.Printf("ERROR: Please login again: sudo monify login")
+			log.Printf("ERROR: Please reinstall with a valid token: curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force")
 
 			// Mark auth as failed
 			a.mu.Lock()
