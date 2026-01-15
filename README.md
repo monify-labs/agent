@@ -1,281 +1,174 @@
 # Monify Agent
 
-A lightweight, high-performance monitoring agent for Linux servers. Collects system metrics and sends them to Monify Cloud for real-time monitoring and alerting.
+Monify Agent is a lightweight, high-performance monitoring agent designed for Linux servers. It collects comprehensive system metrics and securely transmits them to [Monify Cloud](https://monify.cloud) for real-time monitoring, alerting, and visualization.
 
-## Features
+## Key Features
 
-- **CPU Monitoring**: Usage percentage, load averages (1m, 5m, 15m)
-- **Memory Monitoring**: Total, used, free, available, cached, buffers
-- **Disk Monitoring**: Space usage, I/O rates (read/write MB/s, IOPS)
-- **Network Monitoring**: Public/private bandwidth, errors, drops
-- **System Info**: OS, kernel, virtualization, cloud provider detection
-- **Low Resource Usage**: ~20MB RAM, <1% CPU
-- **Secure**: TLS encryption, token-based authentication
-- **Easy Deployment**: Single binary, systemd integration
+**Comprehensive Metrics Collection**
 
-## Quick Install
+- CPU usage and load averages (1m, 5m, 15m)
+- Memory utilization (used, free, available, cached, buffers)
+- Disk space and I/O performance (read/write MB/s, IOPS)
+- Network bandwidth for public and private interfaces
+- System information including uptime and process count
 
-One command to install and start monitoring:
+**Cloud-Native Design**
+
+- Automatic detection of AWS, GCP, and Azure environments
+- Instance type and region identification
+- Virtualization and container awareness
+
+**Production Ready**
+
+- Minimal resource footprint (~20MB RAM, <1% CPU)
+- Secure communication over HTTPS with token authentication
+- Runs as a systemd service with automatic restart
+- Single binary deployment with no dependencies
+
+## System Requirements
+
+| Component        | Requirement                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| Operating System | Linux (Ubuntu, Debian, CentOS, RHEL, Fedora, Amazon Linux, Alpine) |
+| Architecture     | x86_64 (amd64) or ARM64 (aarch64)                                  |
+| Init System      | systemd                                                            |
+| Network          | Outbound HTTPS access to api.monify.cloud                          |
+
+## Installation
+
+Install the agent with a single command:
 
 ```bash
 curl -sSL https://monify.cloud/install.sh | sudo bash -s -- YOUR_TOKEN
 ```
 
-Replace `YOUR_TOKEN` with your server token from [dash.monify.cloud](https://dash.monify.cloud).
+Replace `YOUR_TOKEN` with the server token from your [Monify Dashboard](https://dash.monify.cloud).
 
-That's it! The agent will be installed, configured, and started automatically.
+The installation script will:
 
-## Requirements
+1. Download the appropriate binary for your architecture
+2. Install to `/usr/local/bin/monify`
+3. Create configuration at `/etc/monify/env`
+4. Set up and start the systemd service
 
-- **OS**: Linux (Ubuntu, Debian, CentOS, RHEL, Amazon Linux, etc.)
-- **Architecture**: amd64 (x86_64) or arm64 (aarch64)
-- **Init System**: systemd
+## Updating
 
-## Usage
-
-```bash
-monify [options]
-```
-
-### Options
-
-| Option      | Description                                     |
-| ----------- | ----------------------------------------------- |
-| `--token`   | Authentication token (or set MONIFY_TOKEN)      |
-| `--url`     | Server URL (or set MONIFY_SERVER_URL)           |
-| `--debug`   | Enable debug logging (or set MONIFY_DEBUG=true) |
-| `--version` | Show version information                        |
-| `--help`    | Show help message                               |
-
-### Examples
-
-```bash
-# Run with token from command line
-monify --token=YOUR_TOKEN
-
-# Run with debug mode
-monify --token=YOUR_TOKEN --debug
-
-# Run with custom server URL
-monify --token=YOUR_TOKEN --url=https://custom-api.example.com
-
-# Show version
-monify --version
-
-# Show help
-monify --help
-```
-
-## Configuration
-
-The agent reads configuration in this order (later overrides earlier):
-
-1. **Config file**: `/etc/monify/env`
-2. **Environment variables**
-3. **Command line flags**
-
-### Config file example (`/etc/monify/env`)
-
-```bash
-# Required: Your server token from https://dash.monify.cloud
-MONIFY_TOKEN=your_server_token_here
-
-# Optional: Custom server URL
-MONIFY_SERVER_URL=https://api.monify.cloud/v1/agent/metrics
-
-# Optional: Enable debug logging
-MONIFY_DEBUG=false
-```
-
-### Environment variables
-
-```bash
-# Run with environment variables
-MONIFY_TOKEN=xxx monify
-MONIFY_TOKEN=xxx MONIFY_DEBUG=true monify
-```
-
-## Systemd Service
-
-The agent runs as a systemd service:
-
-```bash
-# Start/stop/restart
-sudo systemctl start monify
-sudo systemctl stop monify
-sudo systemctl restart monify
-
-# View logs
-sudo journalctl -u monify -f
-
-# Check status
-sudo systemctl status monify
-```
-
-## Development
-
-### Prerequisites
-
-- Go 1.22+
-- Make
-
-### Building
-
-```bash
-# Build for current architecture
-make build
-
-# Build for all platforms
-make build-all
-
-# Build for specific architecture
-make build GOARCH=arm64
-```
-
-### Running Locally
-
-```bash
-# Development mode with debug logging
-make dev
-
-# Or manually
-MONIFY_TOKEN=your_token MONIFY_DEBUG=true go run ./cmd/monify
-```
-
-### Project Structure
-
-```
-.
-├── cmd/
-│   └── monify/          # Entry point
-│       └── main.go
-├── internal/
-│   ├── agent/           # Agent core
-│   ├── config/          # Configuration
-│   ├── metrics/         # Metric collectors
-│   │   ├── dynamic/     # Frequently changing metrics
-│   │   └── static/      # Rarely changing metrics
-│   └── sender/          # HTTP sender
-├── pkg/
-│   └── models/          # Data models
-├── scripts/
-│   ├── install.sh       # Installation script
-│   └── uninstall.sh     # Uninstallation script
-├── Makefile
-└── README.md
-```
-
-## Update
-
-### Re-run install script
+To update to the latest version:
 
 ```bash
 curl -sSL https://monify.cloud/install.sh | sudo bash
 ```
 
-If already installed, the script will automatically use your existing token.
+Your existing configuration and token will be preserved.
 
-### Install with new token
+## Uninstallation
 
-```bash
-curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force
-```
-
-Use `--force` when replacing an existing token to avoid accidental overwrites.
-
-## Troubleshooting
-
-### Check service status
-
-```bash
-sudo systemctl status monify
-```
-
-### View logs
-
-```bash
-# Last 50 lines
-journalctl -u monify --no-pager -n 50
-
-# Follow logs in real-time
-journalctl -u monify -f
-```
-
-### Common issues
-
-| Issue                         | Solution                                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------------------------- |
-| Service stopped (auth failed) | Token invalid. Re-install with new token using `--force`                                      |
-| Token not configured          | Install with token: `curl -sSL https://monify.cloud/install.sh \| sudo bash -s -- YOUR_TOKEN` |
-| Service won't start           | Check logs: `journalctl -u monify --no-pager -n 20`                                           |
-| Agent using too much CPU      | Restart: `sudo systemctl restart monify`                                                      |
-
-## Uninstall
+To completely remove the agent:
 
 ```bash
 curl -sSL https://monify.cloud/uninstall.sh | sudo bash
 ```
 
-Or manually:
+This removes the binary, service, configuration, and log files.
+
+## Managing the Service
+
+The agent runs as a systemd service named `monify`:
 
 ```bash
+# Check service status
+sudo systemctl status monify
+
+# View real-time logs
+sudo journalctl -u monify -f
+
+# Restart the service
+sudo systemctl restart monify
+
+# Stop the service
 sudo systemctl stop monify
-sudo systemctl disable monify
-sudo rm -f /usr/local/bin/monify
-sudo rm -f /etc/systemd/system/monify.service
-sudo rm -rf /etc/monify
-sudo rm -rf /var/log/monify
-sudo systemctl daemon-reload
 ```
 
-## Metrics Collected
+## Metrics Reference
 
-### Static Metrics (sent on startup, then hourly)
+### Static Metrics
 
-| Metric            | Description                             |
-| ----------------- | --------------------------------------- |
-| Platform          | OS distribution (ubuntu, centos, etc.)  |
-| Platform Version  | Distribution version                    |
-| Kernel Version    | Linux kernel version                    |
-| Architecture      | CPU architecture (amd64, arm64)         |
-| Virtualization    | Virtualization type (kvm, docker, etc.) |
-| CPU Model         | CPU model name                          |
-| CPU Cores/Threads | Physical cores and logical processors   |
-| Total Memory      | Total RAM                               |
-| Internal IPs      | Private IP addresses                    |
-| Public IP         | Public-facing IP                        |
-| Cloud Region      | AWS/GCP/Azure region (if applicable)    |
-| Instance Type     | Cloud instance type (if applicable)     |
-| Disk Inventory    | Mounted filesystems                     |
+Collected at startup and refreshed every hour:
 
-### Dynamic Metrics (sent every 15s)
+| Metric           | Description                     |
+| ---------------- | ------------------------------- |
+| Platform         | Operating system distribution   |
+| Platform Version | Distribution version            |
+| Kernel Version   | Linux kernel version            |
+| Architecture     | CPU architecture                |
+| Virtualization   | Hypervisor or container runtime |
+| CPU Model        | Processor model name            |
+| CPU Cores        | Physical and logical core count |
+| Total Memory     | Total system RAM                |
+| IP Addresses     | Public and private IPs          |
+| Cloud Provider   | AWS, GCP, Azure, or other       |
+| Instance Type    | Cloud instance type             |
+| Region           | Cloud region/zone               |
 
-| Metric          | Description                             |
-| --------------- | --------------------------------------- |
-| CPU Usage       | Overall CPU usage percentage            |
-| Load Average    | 1m, 5m, 15m load averages               |
-| Memory          | Used, free, available, cached, buffers  |
-| Swap            | Swap usage                              |
-| Disk Space      | Total, used, free across all partitions |
-| Disk I/O        | Read/write MB/s and IOPS                |
-| Network Public  | Public interface bandwidth              |
-| Network Private | Private interface bandwidth             |
-| Network Health  | Errors and drops                        |
-| System          | Uptime, boot time, process count        |
+### Dynamic Metrics
+
+Collected and transmitted every 15 seconds:
+
+| Metric          | Description                            |
+| --------------- | -------------------------------------- |
+| CPU Usage       | Overall CPU utilization percentage     |
+| Load Average    | System load (1m, 5m, 15m)              |
+| Memory Usage    | Used, free, available, cached, buffers |
+| Swap Usage      | Swap utilization                       |
+| Disk Space      | Usage per mounted filesystem           |
+| Disk I/O        | Read/write throughput and IOPS         |
+| Network Traffic | Bandwidth per interface                |
+| Network Errors  | Packet errors and drops                |
+| Process Count   | Total running processes                |
+| Uptime          | System uptime                          |
 
 ## Security
 
-- All data is transmitted over HTTPS
-- Token-based authentication
-- Minimal privileges (requires root only for some metrics)
-- No sensitive data collection (no file contents, no user data)
-- Systemd hardening (NoNewPrivileges, ProtectSystem, etc.)
+Monify Agent is built with security as a priority:
 
-## License
+- **Encrypted Transport**: All communication uses TLS 1.2+
+- **Token Authentication**: Each server has a unique authentication token
+- **Minimal Privileges**: Requires root only for accessing system metrics
+- **No Sensitive Data**: Does not collect file contents, logs, or user data
+- **Systemd Hardening**: Runs with `NoNewPrivileges`, `ProtectSystem=strict`, and other security options
 
-MIT License - see [LICENSE](LICENSE) for details.
+## Troubleshooting
+
+**Agent not sending data**
+
+```bash
+# Check if service is running
+sudo systemctl status monify
+
+# View recent logs for errors
+sudo journalctl -u monify -n 50 --no-pager
+```
+
+**Authentication errors**
+
+```bash
+# Re-install with a new token
+curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN
+```
+
+**High resource usage**
+
+```bash
+# Restart the service
+sudo systemctl restart monify
+```
 
 ## Support
 
-- Issues: https://github.com/monify-labs/agent/issues
-- Email: support@monify.cloud
+- **Dashboard**: [dash.monify.cloud](https://dash.monify.cloud)
+- **Website**: [monify.cloud](https://monify.cloud)
+- **Email**: support@monify.cloud
+
+## License
+
+MIT License — see [LICENSE](LICENSE) for details.
