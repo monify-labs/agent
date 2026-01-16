@@ -22,7 +22,7 @@ const (
 
 // Agent info (injected at build time via ldflags)
 var (
-	Version   = "1.5"
+	Version   = "1.6"
 	Commit    = "unknown"
 	BuildDate = "unknown"
 )
