@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/monify-labs/agent/internal/config"
+	"github.com/monify-labs/agent/internal/metrics/static"
 	"github.com/monify-labs/agent/internal/sender"
 	"github.com/monify-labs/agent/internal/updater"
 	"github.com/monify-labs/agent/pkg/models"
@@ -33,6 +34,7 @@ type Agent struct {
 	running        bool
 	authFailed     bool // When true, authentication has failed permanently
 	hostname       string
+	hostID         string
 	startTime      time.Time
 	lastCollection time.Time
 	lastSend       time.Time
@@ -49,8 +51,14 @@ func NewAgent(serverURL, token string, debug bool) (*Agent, error) {
 	staticCollector := NewStaticCollector()
 	dynamicCollector := NewDynamicCollector()
 
-	// Initialize sender
-	httpSender := sender.NewHTTPSender(serverURL, token)
+	// Get host ID for sender headers
+	hostID := "unknown"
+	if info, err := static.CollectSystemInfo(context.Background()); err == nil {
+		hostID = info.HostID
+	}
+
+	// Initialize sender with hostID
+	httpSender := sender.NewHTTPSender(serverURL, token, hostID)
 
 	// Initialize updater
 	agentUpdater := updater.NewUpdater(debug)
@@ -60,6 +68,7 @@ func NewAgent(serverURL, token string, debug bool) (*Agent, error) {
 		token:            token,
 		debug:            debug,
 		sender:           httpSender,
+		hostID:           hostID,
 		staticCollector:  staticCollector,
 		dynamicCollector: dynamicCollector,
 		updater:          agentUpdater,

@@ -22,11 +22,12 @@ var ErrUnauthorized = errors.New("authentication failed: invalid or expired toke
 type HTTPSender struct {
 	serverURL string
 	token     string
+	hostID    string
 	client    *http.Client
 }
 
 // NewHTTPSender creates a new HTTP sender
-func NewHTTPSender(serverURL, token string) *HTTPSender {
+func NewHTTPSender(serverURL, token, hostID string) *HTTPSender {
 	// Create HTTP client with connection pooling
 	client := &http.Client{
 		Timeout: config.Timeout,
@@ -40,6 +41,7 @@ func NewHTTPSender(serverURL, token string) *HTTPSender {
 	return &HTTPSender{
 		serverURL: serverURL,
 		token:     token,
+		hostID:    hostID,
 		client:    client,
 	}
 }
@@ -77,6 +79,7 @@ func (h *HTTPSender) Send(ctx context.Context, payload *models.MetricPayload) (*
 	req.Header.Set("Content-Encoding", "gzip")
 	req.Header.Set("User-Agent", fmt.Sprintf("monify/%s", config.Version))
 	req.Header.Set("X-Agent-Version", config.Version)
+	req.Header.Set("X-Host-ID", h.hostID)
 
 	// Set authentication if token is configured
 	if h.token != "" {
