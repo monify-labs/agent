@@ -56,7 +56,7 @@ The installation script will:
 To update to the latest version:
 
 ```bash
-curl -sSL https://monify.cloud/install.sh | sudo bash
+curl -sSL https://monify.cloud/update.sh | sudo bash
 ```
 
 Your existing configuration and token will be preserved.
