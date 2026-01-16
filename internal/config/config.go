@@ -16,13 +16,15 @@ const (
 	CollectionInterval    = 15 * time.Second
 	StaticRefreshInterval = 1 * time.Hour
 
-	// Agent info (injected at build time via ldflags)
+	// Environment file path
+	EnvFilePath = "/etc/monify/env"
+)
+
+// Agent info (injected at build time via ldflags)
+var (
 	Version   = "1.3"
 	Commit    = "unknown"
 	BuildDate = "unknown"
-
-	// Environment file path
-	EnvFilePath = "/etc/monify/env"
 )
 
 // LoadEnvFile loads environment variables from /etc/monify/env

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/monify-labs/agent/internal/config"
 	"github.com/monify-labs/agent/internal/sender"
+	"github.com/monify-labs/agent/internal/updater"
 	"github.com/monify-labs/agent/pkg/models"
 )
 
@@ -24,6 +26,7 @@ type Agent struct {
 	sender           sender.Sender
 	staticCollector  *StaticCollector
 	dynamicCollector *DynamicCollector
+	updater          *updater.Updater
 
 	// State
 	mu             sync.RWMutex
@@ -49,6 +52,9 @@ func NewAgent(serverURL, token string, debug bool) (*Agent, error) {
 	// Initialize sender
 	httpSender := sender.NewHTTPSender(serverURL, token)
 
+	// Initialize updater
+	agentUpdater := updater.NewUpdater(debug)
+
 	return &Agent{
 		serverURL:        serverURL,
 		token:            token,
@@ -56,6 +62,7 @@ func NewAgent(serverURL, token string, debug bool) (*Agent, error) {
 		sender:           httpSender,
 		staticCollector:  staticCollector,
 		dynamicCollector: dynamicCollector,
+		updater:          agentUpdater,
 		stopChan:         make(chan struct{}),
 	}, nil
 }
@@ -286,9 +293,60 @@ func (a *Agent) GetStatus() *models.AgentStatus {
 
 // processServerCommands processes commands received from server
 func (a *Agent) processServerCommands(ctx context.Context, commands []models.ServerCommand) {
-	// Currently no supported remote commands from server
-	// Agent will stop automatically if it receives 401/403 (Unauthorized/Forbidden)
-	// which happens when a server is deleted in the backend.
+	for _, cmd := range commands {
+		switch cmd.Command {
+		case "update":
+			a.handleUpdateCommand(ctx, cmd.Params)
+		case "restart":
+			log.Printf("INFO: Received restart command from server")
+			// Trigger graceful restart
+			go func() {
+				time.Sleep(1 * time.Second)
+				a.Stop()
+			}()
+		default:
+			if a.debug {
+				log.Printf("DEBUG: Unknown command received: %s", cmd.Command)
+			}
+		}
+	}
+}
+
+// handleUpdateCommand handles the update command from server
+func (a *Agent) handleUpdateCommand(ctx context.Context, params map[string]any) {
+	if params == nil {
+		log.Printf("ERROR: Update command missing params")
+		return
+	}
+
+	// Parse params
+	var updateParams updater.UpdateParams
+
+	// Marshal and unmarshal to convert map to struct
+	paramsJSON, err := json.Marshal(params)
+	if err != nil {
+		log.Printf("ERROR: Failed to marshal update params: %v", err)
+		return
+	}
+
+	if err := json.Unmarshal(paramsJSON, &updateParams); err != nil {
+		log.Printf("ERROR: Failed to parse update params: %v", err)
+		return
+	}
+
+	if updateParams.Version == "" {
+		log.Printf("ERROR: Update command missing version")
+		return
+	}
+
+	log.Printf("INFO: Received update command: version=%s", updateParams.Version)
+
+	// Run update in background
+	go func() {
+		if err := a.updater.Update(ctx, updateParams); err != nil {
+			log.Printf("ERROR: Update failed: %v", err)
+		}
+	}()
 }
 
 // incrementErrorCount increments the error counter

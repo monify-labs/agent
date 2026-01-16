@@ -307,16 +307,21 @@ main() {
     else
         # Token provided - check if different from existing
         if [ -n "$existing_token" ] && [ "$existing_token" != "" ] && [ "$existing_token" != "$token" ]; then
-            print_warning "Agent is already installed with a different token!"
-            echo ""
-            echo "  Current token: ${existing_token:0:8}..."
-            echo "  New token:     ${token:0:8}..."
-            echo ""
-            print_warning "Replace existing token? [y/n]: "
-            read -r REPLY
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                print_info "Installation cancelled."
-                exit 0
+            if [ "$2" == "--force" ]; then
+                print_info "Force mode: Replacing existing token."
+            else
+                print_warning "Agent is already installed with a different token!"
+                echo ""
+                echo "  Current token: ${existing_token:0:8}..."
+                echo "  New token:     ${token:0:8}..."
+                echo ""
+                print_warning "Replace existing token? [y/n]: "
+                # Read from /dev/tty because stdin is taken by the script pipe
+                read -r REPLY < /dev/tty
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    print_info "Installation cancelled."
+                    exit 0
+                fi
             fi
         fi
     fi
