@@ -312,26 +312,11 @@ main() {
             echo "  Current token: ${existing_token:0:8}..."
             echo "  New token:     ${token:0:8}..."
             echo ""
-            print_warning "This will REPLACE the existing token."
-            print_warning "The old server will lose connection to this agent."
-            echo ""
-            
-            # Ask for confirmation (only if interactive)
-            if [ -t 0 ]; then
-                read -p "Continue? [y/N] " -n 1 -r
-                echo ""
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                    print_info "Installation cancelled."
-                    exit 0
-                fi
-            else
-                # Non-interactive: require --force flag
-                if [ "$2" != "--force" ]; then
-                    print_error "To replace existing token in non-interactive mode, use:"
-                    echo "  curl -sSL https://monify.cloud/install.sh | sudo bash -s -- NEW_TOKEN --force"
-                    exit 1
-                fi
-                print_info "Force mode: Replacing token"
+            print_warning "Replace existing token? [y/n]: "
+            read -r REPLY
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                print_info "Installation cancelled."
+                exit 0
             fi
         fi
     fi
